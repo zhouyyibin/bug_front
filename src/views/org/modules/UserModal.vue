@@ -1,20 +1,7 @@
 <template>
-  <a-modal
-    title="操作"
-    style="top: 20px;"
-    :width="800"
-    v-model="visible"
-    @ok="handleOk"
-  >
-    <a-form
-      :form="form"
-      id="userForm"
-    >
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="所属部门"
-      >
+  <a-modal title="操作" style="top: 20px;" :width="800" v-model="visible" @ok="handleOk">
+    <a-form :form="form" id="userForm">
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="所属部门">
         <a-select
           @change="handleChange"
           v-decorator="[
@@ -38,13 +25,9 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="账号"
-      >
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="账号">
         <a-input
-          placeholder=""
+          placeholder
           v-decorator="[
             'account',
             {rules: [{ required: true, message: '请输入邮箱格式的账号' }, {type: 'email', message: '请输入正确邮箱格式'}]}
@@ -52,13 +35,9 @@
         />
       </a-form-item>
 
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="真实姓名"
-      >
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="真实姓名">
         <a-input
-          placeholder=""
+          placeholder
           v-decorator="[
             'name',
             {rules: [{ required: true, message: '请输入真实姓名' }]}
@@ -66,16 +45,12 @@
         />
       </a-form-item>
 
-
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="角色"
-      >
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="角色">
         <a-select
-          placeholder=""
+          placeholder
+          mode="multiple"
           v-decorator="[
-            'roleId',
+            'roleBeans',
             {rules: [{ required: true, message: '请选择用户角色' }]}
           ]"
         >
@@ -83,62 +58,30 @@
         </a-select>
       </a-form-item>
 
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="职位"
-      >
-        <a-input
-          placeholder=""
-          v-decorator="[
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="职位">
+        <a-input placeholder v-decorator="[
             'position'
-          ]"
-        />
+          ]" />
       </a-form-item>
 
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="联系电话"
-      >
-        <a-input
-          placeholder=""
-          v-decorator="[
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="联系电话">
+        <a-input placeholder v-decorator="[
             'tel'
-          ]"
-        />
+          ]" />
       </a-form-item>
 
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="QQ"
-      >
-        <a-input
-          placeholder=""
-          v-decorator="[
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="QQ">
+        <a-input placeholder v-decorator="[
             'qq'
-          ]"
-        />
+          ]" />
       </a-form-item>
 
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="微信"
-      >
-        <a-input
-          placeholder=""
-          v-decorator="[
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="微信">
+        <a-input placeholder v-decorator="[
             'wechar'
-          ]"
-        />
+          ]" />
       </a-form-item>
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="性别"
-      >
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="性别">
         <a-radio-group
           name="radioGroup"
           v-decorator="[
@@ -154,24 +97,19 @@
         </a-radio-group>
       </a-form-item>
 
-      <a-form-item
-        :labelCol="labelCol"
-        :wrapperCol="wrapperCol"
-        label="数据权限"
-      >
+      <a-form-item :labelCol="labelCol" :wrapperCol="wrapperCol" label="数据权限">
         <a-radio-group
           name="radioGroup"
           v-decorator="[
-            'sex',
+            'setData',
             {
-              initialValue: 0,
+              initialValue: 1,
             }
           ]"
         >
-          <a-radio :value="1">本人数据</a-radio>
+          <a-radio :value="3">本人数据</a-radio>
           <a-radio :value="2">本部门数据</a-radio>
-          <a-radio :value="3">本公司数据</a-radio>
-          <a-radio :value="0">全部数据</a-radio>
+          <a-radio :value="1">本公司数据</a-radio>
         </a-radio-group>
       </a-form-item>
     </a-form>
@@ -221,9 +159,11 @@ export default {
     edit(record) {
       this.mdl = record ? Object.assign({}, record) : ''
       this.visible = true
-      console.log( this.mdl )
+      console.log(this.mdl)
       this.$nextTick(() => {
-        this.form.setFieldsValue(pick(this.mdl, 'name', 'account', 'position', 'roleId', 'departmentId', 'qq', 'wechar', 'mail'))
+        this.form.setFieldsValue(
+          pick(this.mdl, 'name', 'account', 'position', 'departmentId', 'qq', 'wechar', 'mail', 'roleBeans', 'setData')
+        )
       })
     },
     close() {

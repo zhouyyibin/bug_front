@@ -2,8 +2,8 @@
  * @Author: pengzhiming
  * @Date: 2019-05-20 14:26:46
  * @LastEditors: pengzhiming
- * @LastEditTime: 2019-12-13 09:30:49
- * @Description:
+ * @LastEditTime: 2019-08-22 09:38:54
+ * @Description: 
  -->
 <template>
   <div>
@@ -47,7 +47,15 @@
                 @click="handleDelete(record)"
               >{{record.status ? '禁用' : '启用'}}</a>
               <a-divider type="vertical" />
+<<<<<<< HEAD
+              <a
+                href="javascript:;"
+                v-action="`org_user_remove`"
+                @click="handleRemove(record)"
+                >删除</a>
+=======
               <a href="javascript:;" v-action="`org_user_remove`" @click="handleRemove(record)">删除</a>
+>>>>>>> b31dfe705410d4bd826899da854fd743e8b68e3c
             </span>
           </s-table>
         </a-card>

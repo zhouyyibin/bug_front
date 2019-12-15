@@ -66,6 +66,7 @@ export default {
   data() {
     return {
       id: this.$route.params.id,
+      hasAdded: false,
       uploadUrl:
         process.env.NODE_ENV === 'development'
           ? '/api/upload'
@@ -142,6 +143,7 @@ export default {
           this.loading = true
 
           const action = this.id ? 'update' : 'save'
+          this.hasAdded = true
           api.project[action](data)
             .then(res => {
               this.$message.success('保存成功')
@@ -178,6 +180,11 @@ export default {
       this[key].splice(index, 1)
     },
     onDeleteLeading() {}
+  },
+  beforeRouteLeave(to, from, next) {
+    // 设置下一个路由的 meta
+    this.hasAdded && (to.meta.keepAlive = false) // C 跳转到 A 时让 A 不缓存，即刷新
+    next()
   }
 }
 </script>

@@ -49,6 +49,11 @@ class BugModel extends RestModel {
     data['annexs'] && data['annexs'].length > 0 && (data['annex'] = data['annexs'][0])
     return this.resource.put(`/bug/${data.id}`, data)
   }
+
+  // 获取统计表
+  getAllCount() {
+    return this.resource.get('/bug/statistics/all/count')
+  }
 }
 
 export default new BugModel()

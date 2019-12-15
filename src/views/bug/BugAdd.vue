@@ -479,6 +479,7 @@ export default {
       moment,
       spinning: false,
       id: this.$route.params.id,
+      hasAdded: false,
       uploadUrl:
         process.env.NODE_ENV === 'development'
           ? '/api/upload'
@@ -614,9 +615,6 @@ export default {
 
       const sendMailUsers = item.senderBeans
       this.fixedSenders = sendMailUsers
-      // this.form.setFieldsValue({
-      //   sendMailUsers
-      // })
     },
     async getDetail() {
       this.spinning = true
@@ -688,6 +686,7 @@ export default {
           const data = this.reformatData(values)
           this.loading = true
           const action = this.id ? 'updateBug' : 'save'
+          this.hasAdded = true
           api.bug[action](data)
             .then(res => {
               this.$message.success('保存成功')
@@ -702,7 +701,7 @@ export default {
     },
     reformatData(data) {
       data.describe = encodeURIComponent(data.describe)
-      if(data.settling_time.isBefore(data.start_time)) {
+      if (data.settling_time.isBefore(data.start_time)) {
         this.$message.error('解决日期不能在开始日期之前')
         return
       }
@@ -793,8 +792,12 @@ export default {
     },
     deleteUser(key, index) {
       this[key].splice(index, 1)
-    },
-    onDeleteLeading() {}
+    }
+  },
+  beforeRouteLeave(to, from, next) {
+    // 设置下一个路由的 meta
+    this.hasAdded && (to.meta.keepAlive = false) // C 跳转到 A 时让 A 不缓存，即刷新
+    next()
   }
 }
 </script>

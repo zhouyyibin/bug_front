@@ -12,11 +12,9 @@
           <head-info title="本周完成任务数" content="24个"/>
         </a-col>
       </a-row>
-    </a-card> -->
+    </a-card>-->
 
-    <a-card
-      style="margin-top: 24px"
-      :bordered="false">
+    <a-card style="margin-top: 24px" :bordered="false">
       <div slot="title">
         <a-radio-group @change="onChangeType" v-model="queryParam.type">
           <a-radio-button :value="0">全部</a-radio-button>
@@ -31,10 +29,9 @@
           style="margin-left: 10px;width: 200px"
           @search="onSearch"
         />
-        
 
         <div style="display:inline-block;margin-right: 10px;font-size:14px;float:right">
-           <a-select
+          <a-select
             placeholder="选择项目"
             @change="handleChangeProject"
             style="width: 200px;display:inline-block;margin-left: 5px;"
@@ -49,41 +46,38 @@
 
           <a-select
             placeholder="选择部门"
-             v-action="`bug_choose_department`"
+            v-action="`bug_choose_department`"
             @change="handleChangeDepartment"
+            class="depart-selector"
+            :dropdownMatchSelectWidth="false"
             style="width: 200px;display:inline-block;margin-left: 5px;"
           >
-            <a-select-option :value="0">全部</a-select-option>
             <template v-for="item in departmentList">
               <a-select-option :value="item.id">{{ item.name }}</a-select-option>
-              <template v-for="item2 in item.departments">
-                <a-select-option :value="item2.id">{{ item.name }}>{{ item2.name }}</a-select-option>
-                <template v-for="item3 in item2.departments">
-                  <a-select-option :value="item3.id">{{ item.name }}>{{ item2.name }}>{{ item3.name }}</a-select-option>
-                </template>
-              </template>
             </template>
           </a-select>
         </div>
-        
       </div>
 
       <div slot="extra">
-        <a-button style="margin-right:10px" v-action="`bug_export_excel`" @click="exportExcel"><a-icon type="file-excel" />导出Excel</a-button>
-        <a-button type="primary"  v-action="`bug_add_bug`" @click="$router.push('/bug/add')" ><a-icon type="plus" />提Bug</a-button>
+        <a-button style="margin-right:10px" v-action="`bug_export_excel`" @click="exportExcel">
+          <a-icon type="file-excel" />导出Excel
+        </a-button>
+        <a-button type="primary" v-action="`bug_add_bug`" @click="$router.push('/bug/add')">
+          <a-icon type="plus" />提Bug
+        </a-button>
       </div>
 
-      <s-table
-        ref="table"
-        size="default"
-        rowKey="id"
-        :columns="columns"
-        :data="loadData"
-      >
+      <s-table ref="table" size="default" rowKey="id" :columns="columns" :data="loadData">
         <span slot="title2" slot-scope="text, record">
-          <a-popover title="当前状态"  v-if="record" >
+          <a-popover title="当前状态" v-if="record">
             <template slot="content">
-              <a-steps size="small" labelPlacement="vertical" :current="record.status" class="steps-popover">
+              <a-steps
+                size="small"
+                labelPlacement="vertical"
+                :current="record.status"
+                class="steps-popover"
+              >
                 <a-step title="未确认" />
                 <a-step title="已确认" />
                 <a-step title="处理中" />
@@ -92,20 +86,23 @@
               </a-steps>
             </template>
             <!-- <Ellipsis href="javascript:;" style="color:#333"><Ellipsis :length="50" tooltip>{{ text }}</Ellipsis></a> -->
-            <a-tooltip placement="bottom" >
+            <a-tooltip placement="bottom">
               <template slot="title">
-                  <span>{{text}}</span>
+                <span>{{text}}</span>
               </template>
               <a href="javascript:;" style="color:#333">{{ text | maxLength }}</a>
             </a-tooltip>
           </a-popover>
         </span>
-        <span slot="severity"  class="severity_num" :class="severityClass(text)" slot-scope="text">
+        <span slot="severity" class="severity_num" :class="severityClass(text)" slot-scope="text">
           <label style="white-space:nowrap">{{BUG_VARIABLES.severity[text]}}</label>
         </span>
-        <span slot="priority"   class="priority_num" :class="priorityClass(text)" slot-scope="text">
-          {{ BUG_VARIABLES.priority[text]}}
-        </span>
+        <span
+          slot="priority"
+          class="priority_num"
+          :class="priorityClass(text)"
+          slot-scope="text"
+        >{{ BUG_VARIABLES.priority[text]}}</span>
 
         <span slot="model" slot-scope="text">
           <label style="white-space:nowrap">{{ text }}</label>
@@ -117,10 +114,10 @@
 
         <span slot="action" slot-scope="text, record">
           <router-link :to="`/bug/detail/${record.id}`" v-action="`bug_show_bug`">详情</router-link>
-          <a-divider type="vertical"/>
-          <router-link :to="`/bug/edit/${record.id}`" v-if="isEditable(record)"  v-action="`bug_edit_bug`">编辑</router-link>
-          <a-divider type="vertical"/>
-          <a href="javascript:;" @click="handleDelete(record.id)" v-if="isEditable(record)"  v-action="`bug_delete_bug`">删除</a>
+          <a-divider type="vertical" />
+          <router-link :to="`/bug/edit/${record.id}`" v-action="`bug_edit_bug`">编辑</router-link>
+          <a-divider type="vertical" />
+          <a href="javascript:;" @click="handleDelete(record.id)" v-action="`bug_delete_bug`">删除</a>
         </span>
       </s-table>
     </a-card>
@@ -139,66 +136,79 @@ export default {
     STable,
     Ellipsis
   },
-  data () {
+  data() {
     return {
       BUG_VARIABLES,
       STATUS_CODES,
       exportVisible: false,
       departmentList: [],
       projectList: [],
+      allCount: [],
       columns: [
         {
           title: '编号',
-          dataIndex: 'code'
+          dataIndex: 'code',
+          sorter: (a, b) => Number(a.code) - Number(b.code)
         },
         {
           title: 'Bug标题',
           dataIndex: 'title',
-          scopedSlots: { customRender: 'title2' }
+          scopedSlots: { customRender: 'title2' },
+          sorter: (a, b) => a.title.localeCompare(b.title)
         },
         {
           title: '严重程度',
           dataIndex: 'severity',
-          scopedSlots: { customRender: 'severity' }
+          scopedSlots: { customRender: 'severity' },
+          sorter: (a, b) => a.severity - b.severity
         },
         {
           title: '优先级',
           dataIndex: 'priority',
-          scopedSlots: { customRender: 'priority' }
+          scopedSlots: { customRender: 'priority' },
+          sorter: (a, b) => a.priority - b.priority
         },
         {
           title: '项目',
-          dataIndex: 'project'
+          dataIndex: 'project',
+          sorter: (a, b) => a.project.localeCompare(b.project)
         },
         {
           title: '模块',
           dataIndex: 'model',
-          scopedSlots: { customRender: 'model' }
+          scopedSlots: { customRender: 'model' },
+          sorter: (a, b) => a.model.localeCompare(b.model)
         },
         {
           title: '状态',
           dataIndex: 'status',
-          scopedSlots: { customRender: 'status' }
+          scopedSlots: { customRender: 'status' },
+          sorter: (a, b) => a.status - b.status
         },
         {
           title: '创建人',
-          dataIndex: 'creatorName'
+          dataIndex: 'creatorName',
+          sorter: (a, b) => a.creatorName.localeCompare(b.creatorName)
         },
         {
           title: '开始日期',
           dataIndex: 'startTime',
-          customRender: v => v.substring(0, 10)
+          customRender: v => v.substring(0, 10),
+          sorter: (a, b) => a.startTime.localeCompare(b.startTime)
         },
         {
           title: '截止日期',
           dataIndex: 'settlingTime',
           customRender: v => v.substring(0, 10),
-          sort: true
+          sorter: (a, b) => a.settlingTime.localeCompare(b.settlingTime)
         },
         {
           title: '负责人',
           dataIndex: 'leading',
-          customRender: v => v.name
+          customRender: v => v.name,
+          sorter: (a, b) => {
+            return a.leading.name.localeCompare(b.leading.name)
+          }
         },
         {
           title: '操作',
@@ -222,7 +232,7 @@ export default {
   },
   created() {
     this.getDepartList()
-    this.getProjecttList()
+    this.getProjectList()
   },
   computed: {
     userid() {
@@ -231,17 +241,19 @@ export default {
   },
   filters: {
     maxLength(val) {
-      return val.length > 10 ? (val.substring(0, 10) + '...') : val
+      return val.length > 10 ? val.substring(0, 10) + '...' : val
     }
   },
   methods: {
-    getProjecttList() {
-      api.project.list({
-        pageSize: -1,
-        pageNo: 1
-      }).then(res => {
-        this.projectList = res.result.data
-      })
+    getProjectList() {
+      api.project
+        .list({
+          pageSize: -1,
+          pageNo: 1
+        })
+        .then(res => {
+          this.projectList = res.result.data
+        })
     },
     isEditable(record) {
       return record.leading.id == this.userid || record.creatorId == this.userid
@@ -272,19 +284,19 @@ export default {
       })
     },
     getDepartList() {
-      api.department.tree().then(res => {
+      api.department.getSearchList().then(res => {
         const data = res.result.data
         this.departmentList = this.formatTree(data)
       })
     },
     priorityClass(num) {
       const classObj = {}
-      classObj[`priority_num_${5-num}`] = true
+      classObj[`priority_num_${5 - num}`] = true
       return classObj
     },
     severityClass(num) {
       const classObj = {}
-      classObj[`severity_num_${6-num}`] = true
+      classObj[`severity_num_${6 - num}`] = true
       return classObj
     },
     onChangeType() {
@@ -306,7 +318,7 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk: () => {
-          api.bug.remove(id).then(() => this.$refs.table.refresh(1))
+          api.bug.remove(id).then(() => this.$refs.table.refresh(false))
         },
         onCancel: () => {
           console.log('Cancel')
@@ -318,25 +330,25 @@ export default {
 </script>
 
 <style lang="less" scoped>
-    .ant-avatar-lg {
-        width: 48px;
-        height: 48px;
-        line-height: 48px;
-    }
+.ant-avatar-lg {
+  width: 48px;
+  height: 48px;
+  line-height: 48px;
+}
 
-    .list-content-item {
-        color: rgba(0, 0, 0, .45);
-        display: inline-block;
-        vertical-align: middle;
-        font-size: 14px;
-        margin-left: 40px;
-        span {
-            line-height: 20px;
-        }
-        p {
-            margin-top: 4px;
-            margin-bottom: 0;
-            line-height: 22px;
-        }
-    }
+.list-content-item {
+  color: rgba(0, 0, 0, 0.45);
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 14px;
+  margin-left: 40px;
+  span {
+    line-height: 20px;
+  }
+  p {
+    margin-top: 4px;
+    margin-bottom: 0;
+    line-height: 22px;
+  }
+}
 </style>

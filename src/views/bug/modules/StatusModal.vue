@@ -7,11 +7,7 @@
     @ok="handleOk"
   >
     <a-form :form="form">
-      <a-form-item
-        label="附件"
-        :label-col="{ span: 2 }"
-        :wrapper-col="{ span: 12 }"
-      >
+      <a-form-item label="附件" :label-col="{ span: 2 }" :wrapper-col="{ span: 12 }">
         <a-upload
           v-decorator="[
             'annexs', {
@@ -28,28 +24,21 @@
           :action="uploadUrl"
         >
           <a-button>
-            <a-icon type="upload" /> 选择文件
+            <a-icon type="upload" />选择文件
           </a-button>
         </a-upload>
         <div>
-          附件文件类型： <br />
-          文档：doc docx xls xlsx ppt pptx pdf csv<br />
-          图片：bmp jpg png gif<br />
-          视频：3GP MP4 AVI
+          附件文件类型：
+          <br />文档：doc docx xls xlsx ppt pptx pdf csv
+          <br />图片：bmp jpg png gif
+          <br />视频：3GP MP4 AVI
         </div>
       </a-form-item>
 
-      <a-form-item
-        label="描述"
-        :label-col="{ span: 2 }"
-        :wrapper-col="{ span: 12 }"
-      >
-        <a-textarea
-          placeholder=""
-          v-decorator="[
+      <a-form-item label="描述" :label-col="{ span: 2 }" :wrapper-col="{ span: 12 }">
+        <a-textarea placeholder v-decorator="[
             'describe'
-          ]"
-        />
+          ]" />
       </a-form-item>
     </a-form>
     <!-- <HistoryList :list="history"></HistoryList> -->
@@ -171,17 +160,22 @@ export default {
       return e && this.filterValidFile(e.fileList)
     },
     reformatData(data) {
-      data.describe = encodeURIComponent(data.describe)
+      data.describe = data.describe ? encodeURIComponent(data.describe) : ''
       if (data.annexs && data.annexs.length > 0) {
         data.annexs = data.annexs.map(i => {
-          console.log(i)
           return i.hasOwnProperty('response')
-            ? `http://${window.localStorage.getItem('VUE_APP_HOST') ? window.localStorage.getItem('VUE_APP_HOST') : process.env.VUE_APP_HOST}:${window.localStorage.getItem('VUE_APP_PORT') ? window.localStorage.getItem('VUE_APP_PORT') : process.env.VUE_APP_PORT}/download?path=${i.response.data}`
+            ? `http://${
+                window.localStorage.getItem('VUE_APP_HOST')
+                  ? window.localStorage.getItem('VUE_APP_HOST')
+                  : process.env.VUE_APP_HOST
+              }:${
+                window.localStorage.getItem('VUE_APP_PORT')
+                  ? window.localStorage.getItem('VUE_APP_PORT')
+                  : process.env.VUE_APP_PORT
+              }/download?path=${i.response.data}`
             : i
         })
       }
-
-      console.log(data)
 
       return data
     },

@@ -1,3 +1,12 @@
 import RestModel from '../utils/model'
-const department = new RestModel('department')
-export default department
+class DepartmentModel extends RestModel {
+  constructor() {
+    super('department')
+  }
+
+  getSearchList() {
+    return this.resource.get('/department/check/list')
+  }
+}
+
+export default new DepartmentModel()

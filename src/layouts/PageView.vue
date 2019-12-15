@@ -1,7 +1,12 @@
 <template>
   <div :style="!$route.meta.hiddenHeaderContent ? 'margin: -24px -24px 0px;' : null">
     <!-- pageHeader , route meta :true on hide -->
-    <page-header v-if="!$route.meta.hiddenHeaderContent" :title="pageTitle" :logo="logo" :avatar="avatar">
+    <page-header
+      v-if="!$route.meta.hiddenHeaderContent"
+      :title="pageTitle"
+      :logo="logo"
+      :avatar="avatar"
+    >
       <slot slot="action" name="action"></slot>
       <slot slot="content" name="headerContent"></slot>
       <div slot="content" v-if="!this.$slots.headerContent && description">
@@ -17,7 +22,7 @@
       </div>
       <slot slot="extra" name="extra">
         <div class="extra-img">
-          <img v-if="typeof extraImage !== 'undefined'" :src="extraImage"/>
+          <img v-if="typeof extraImage !== 'undefined'" :src="extraImage" />
         </div>
       </slot>
       <div slot="pageMenu">
@@ -40,11 +45,10 @@
     <div class="content">
       <div class="page-header-index-wide">
         <slot>
-          <!-- keep-alive  -->
-          <keep-alive v-if="multiTab">
-            <router-view ref="content" />
+          <keep-alive>
+              <router-view v-if="$route.meta.keepAlive"></router-view>
           </keep-alive>
-          <router-view v-else ref="content" />
+          <router-view v-if="!$route.meta.keepAlive"></router-view>
         </slot>
       </div>
     </div>
@@ -53,12 +57,14 @@
 
 <script>
 import { mapState } from 'vuex'
+import RouteView from './RouteView'
 import PageHeader from '@/components/PageHeader'
 
 export default {
   name: 'PageView',
   components: {
-    PageHeader
+    PageHeader,
+    RouteView
   },
   props: {
     avatar: {
@@ -74,7 +80,7 @@ export default {
       default: null
     }
   },
-  data () {
+  data() {
     return {
       pageTitle: null,
       description: null,
@@ -89,16 +95,16 @@ export default {
       multiTab: state => state.app.multiTab
     })
   },
-  mounted () {
+  mounted() {
     this.getPageMeta()
   },
-  updated () {
+  updated() {
     this.getPageMeta()
   },
   methods: {
-    getPageMeta () {
+    getPageMeta() {
       // eslint-disable-next-line
-      this.pageTitle = (typeof(this.title) === 'string' || !this.title) ? this.title : this.$route.meta.title
+      this.pageTitle = typeof this.title === 'string' || !this.title ? this.title : this.$route.meta.title
 
       const content = this.$refs.content
       if (content) {
@@ -118,59 +124,59 @@ export default {
 </script>
 
 <style lang="less" scoped>
-  .content {
-    margin: 24px 24px 0;
-    .link {
-      margin-top: 16px;
-      &:not(:empty) {
-        margin-bottom: 16px;
+.content {
+  margin: 24px 24px 0;
+  .link {
+    margin-top: 16px;
+    &:not(:empty) {
+      margin-bottom: 16px;
+    }
+    a {
+      margin-right: 32px;
+      height: 24px;
+      line-height: 24px;
+      display: inline-block;
+      i {
+        font-size: 24px;
+        margin-right: 8px;
+        vertical-align: middle;
       }
-      a {
-        margin-right: 32px;
+      span {
         height: 24px;
         line-height: 24px;
         display: inline-block;
-        i {
-          font-size: 24px;
-          margin-right: 8px;
-          vertical-align: middle;
-        }
-        span {
-          height: 24px;
-          line-height: 24px;
-          display: inline-block;
-          vertical-align: middle;
-        }
+        vertical-align: middle;
       }
     }
   }
-  .page-menu-search {
-    text-align: center;
-    margin-bottom: 16px;
-  }
-  .page-menu-tabs {
-    margin-top: 48px;
-  }
+}
+.page-menu-search {
+  text-align: center;
+  margin-bottom: 16px;
+}
+.page-menu-tabs {
+  margin-top: 48px;
+}
 
+.extra-img {
+  margin-top: -60px;
+  text-align: center;
+  width: 195px;
+
+  img {
+    width: 100%;
+  }
+}
+
+.mobile {
   .extra-img {
-    margin-top: -60px;
+    margin-top: 0;
     text-align: center;
-    width: 195px;
+    width: 96px;
 
     img {
       width: 100%;
     }
   }
-
-  .mobile {
-    .extra-img{
-      margin-top: 0;
-      text-align: center;
-      width: 96px;
-
-      img{
-        width: 100%;
-      }
-    }
-  }
+}
 </style>

@@ -4,14 +4,11 @@
       <a-col :span="16">
         <div>
           <a-button @click="$router.go(-1)">返回</a-button>
-          <label style="margin-left:10px">{{ detail.title }}
+          <label style="margin-left:10px">
+            {{ detail.title }}
             <a-popover title="当前状态">
               <template slot="content">
-                <a-steps
-                  size="small"
-                  labelPlacement="vertical"
-                  :current="currentStatus"
-                >
+                <a-steps size="small" labelPlacement="vertical" :current="currentStatus">
                   <a-step title="未确认" />
                   <a-step title="已确认" />
                   <a-step title="处理中" />
@@ -23,16 +20,14 @@
                 class="status-bug status-active"
                 style="margin-left:5px"
                 :class="`status-bug_${currentStatus}`"
-              >{{ STATUS_CODES[currentStatus] || '未确认' }}</span></a-popover>
+              >{{ STATUS_CODES[currentStatus] || '未确认' }}</span>
+            </a-popover>
           </label>
         </div>
 
         <a-card style="margin-top:10px;">
           <h4>描述</h4>
-          <div
-            class="describe-content"
-            v-html="decodedContent || '无'"
-          ></div>
+          <div class="describe-content" v-html="decodedContent || '无'"></div>
 
           <HistoryList :list="history"></HistoryList>
 
@@ -40,14 +35,9 @@
             <h4>附件</h4>
             <div>
               <ul>
-                <li
-                  v-for="item in detail.annexs"
-                  v-if="item && item != ''"
-                  :key="item"
-                ><a
-                  :href="item"
-                  target="_blank"
-                >{{ item | fileName }}</a></li>
+                <li v-for="item in detail.annexs" v-if="item && item != ''" :key="item">
+                  <a :href="item" target="_blank">{{ item | fileName }}</a>
+                </li>
               </ul>
             </div>
           </div>
@@ -60,7 +50,7 @@
               id="back"
               class="btn"
             >
-              <a-icon type="back" />返回</a> -->
+            <a-icon type="back" />返回</a>-->
             <template v-action="`bug_detail_buttons`">
               <!-- 已通过 -->
               <a
@@ -68,31 +58,29 @@
                 class="btn btn-link iframe"
                 @click="showModal(0)"
               >
-                <a-icon type="unlock" /> <span class="text">激活</span></a>
-              <a
-                class="btn btn-link iframe"
-                @click="showModal(1)"
-                v-if="!currentStatus"
-              >
-                <a-icon type="eye" /> <span class="text">确认</span></a>
-              <a
-                class="btn btn-link iframe"
-                @click="showModal(2)"
-                v-if="currentStatus == 1"
-              >
-                <a-icon type="code" /> <span class="text">处理中</span></a>
-              <a
-                class="btn btn-link iframe"
-                @click="showModal(3)"
-                v-if="currentStatus == 2"
-              >
-                <a-icon type="check" /> <span class="text">解决</span></a>
+                <a-icon type="unlock" />
+                <span class="text">激活</span>
+              </a>
+              <a class="btn btn-link iframe" @click="showModal(1)" v-if="!currentStatus">
+                <a-icon type="eye" />
+                <span class="text">确认</span>
+              </a>
+              <a class="btn btn-link iframe" @click="showModal(2)" v-if="currentStatus == 1">
+                <a-icon type="code" />
+                <span class="text">处理中</span>
+              </a>
+              <a class="btn btn-link iframe" @click="showModal(3)" v-if="currentStatus == 2">
+                <a-icon type="check" />
+                <span class="text">解决</span>
+              </a>
               <a
                 class="btn btn-link iframe"
                 @click="showModal(4)"
-                v-if="currentStatus == 3"
+                v-if="currentStatus == 3 && isCreatedByMe"
               >
-                <a-icon type="smile" /> <span class="text">通过</span></a>
+                <a-icon type="smile" />
+                <span class="text">通过</span>
+              </a>
             </template>
             <!-- <a
               class="btn btn-link iframe"
@@ -106,16 +94,13 @@
               v-action="`bug_delete_bug`"
               @click="handleDelete(id)"
             >
-              <a-icon type="delete" /> <span class="text">删除</span></a> -->
+            <a-icon type="delete" /> <span class="text">删除</span></a>-->
           </div>
         </div>
       </a-col>
       <a-col :span="8">
         <div style="text-align:right">
-          <a-button
-            type="primary"
-            @click="$router.push('/bug/add')"
-          >+提Bug</a-button>
+          <a-button type="primary" @click="$router.push('/bug/add')">+提Bug</a-button>
         </div>
         <a-card style="margin-top:10px;">
           <table class="table table-data">
@@ -147,17 +132,21 @@
               </tr>
               <tr>
                 <th>优先级</th>
-                <td><span
-                  class="priority_num"
-                  :class="priorityClass(detail.priority)"
-                >{{ BUG_VARIABLES.priority[detail.priority] }}</span></td>
+                <td>
+                  <span
+                    class="priority_num"
+                    :class="priorityClass(detail.priority)"
+                  >{{ BUG_VARIABLES.priority[detail.priority] }}</span>
+                </td>
               </tr>
               <tr>
                 <th>Bug状态</th>
-                <td><span
-                  class="status-bug status-active"
-                  :class="`status-bug_${currentStatus}`"
-                >{{ STATUS_CODES[currentStatus] || '未确认' }}</span></td>
+                <td>
+                  <span
+                    class="status-bug status-active"
+                    :class="`status-bug_${currentStatus}`"
+                  >{{ STATUS_CODES[currentStatus] || '未确认' }}</span>
+                </td>
               </tr>
               <tr>
                 <th>当前指派</th>
@@ -171,8 +160,7 @@
               </tr>
               <tr>
                 <th>截止日期</th>
-                <td>
-                  {{ detail.settlingTime | dateTrim }}</td>
+                <td>{{ detail.settlingTime | dateTrim }}</td>
               </tr>
               <!-- <tr>
                 <th>操作系统</th>
@@ -181,18 +169,14 @@
               <tr>
                 <th>浏览器</th>
                 <td>{{ detail.browser }}</td>
-              </tr> -->
+              </tr>-->
             </tbody>
           </table>
         </a-card>
       </a-col>
     </a-row>
 
-    <status-modal
-      ref="modal"
-      :history="history"
-      @ok="onSetStatus"
-    ></status-modal>
+    <status-modal ref="modal" :history="history" @ok="onSetStatus"></status-modal>
   </div>
 </template>
 
@@ -228,7 +212,10 @@ export default {
       return this.detail.status
     },
     decodedContent() {
-      return decodeURIComponent(this.detail.describe)
+      return this.detail.describe ? decodeURIComponent(this.detail.describe) : '无'
+    },
+    isCreatedByMe() {
+      return this.$store.getters.userInfo.name === this.detail.creatorName
     },
     isAdmin() {
       return this.$store.getters.userInfo.name === 'admin'

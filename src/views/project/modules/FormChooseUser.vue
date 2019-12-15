@@ -2,24 +2,15 @@
   <div class="choose-user-input">
     <div class="choose-user-tags">
       <a-tag
-        closable
+        :closable="!isDetail"
         @close="deleteTag(index)"
         :key="item.account"
         v-for="(item, index) in tags"
       >{{item.name}}</a-tag>
     </div>
-    <a-button
-      type="primary"
-      @click="visible=true"
-    >选择用户</a-button>
+    <a-button size="small" type="primary" @click="visible=true" v-if="!isDetail">选择用户</a-button>
 
-    <a-modal
-      :title="title"
-      style="top: 20px;"
-      :width="600"
-      v-model="visible"
-      @ok="handleOk"
-    >
+    <a-modal :title="title" style="top: 20px;" :width="600" v-model="visible" @ok="handleOk">
       <div style="display:flex;justify-content:center;align-items: center">
         <a-transfer
           :dataSource="userList"
@@ -29,8 +20,7 @@
           @change="handleChange"
           @selectChange="handleSelectChange"
           :render="renderItem"
-        >
-        </a-transfer>
+        ></a-transfer>
       </div>
     </a-modal>
   </div>
@@ -42,6 +32,13 @@ import api from '@/api'
 export default {
   props: {
     title: String,
+    users: Array,
+    isDetail: {
+      type: Boolean,
+      default() {
+        return false
+      }
+    },
     value: {
       type: Array,
       default() {
@@ -64,8 +61,9 @@ export default {
     }
   },
   watch: {
-    value (val = []) {
-      this.targetKeys = val
+    value(val = []) {
+      this.targetKeys = val.map(i => i.id)
+      this.tags = val
     },
     targetKeys(newVal, oldVal) {
       if (this.isSingle && newVal.length > 1) {
@@ -75,7 +73,14 @@ export default {
     }
   },
   created() {
-    this.getUsers()
+    if (this.users.length === 0) {
+      this.getUsers()
+    } else {
+      this.userList = this.users
+    }
+
+    this.targetKeys = this.value.map(i => i.id)
+    this.tags = this.value
   },
   methods: {
     deleteTag(index) {
@@ -100,7 +105,7 @@ export default {
           this.userList = res.result.data.map(i => {
             i.key = i.id
             i.title = i.name
-            i.description = i.position
+            i.description = i.name
             i.chosen = false
             return i
           })
@@ -137,26 +142,19 @@ export default {
 }
 </script>
 
-<style lang="less">
+<style lang="less" scoped>
 .choose-user-input {
   outline: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
   box-sizing: border-box;
   display: block;
   background-color: #fff;
   border-radius: 4px;
-  border: 1px solid #d9d9d9;
-  border-top-width: 1.02px;
-  transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  min-height: 34px;
+  border: none;
   position: relative;
   .ant-btn {
-    position: absolute;
-    right: 0;
-    top: 0;
+    position: relative !important;
+    margin: 5px;
   }
 }
 .choose-user-tags {
@@ -166,7 +164,6 @@ export default {
   position: relative;
   line-height: 30px;
   margin-left: 5px;
-  margin-bottom: -3px;
   height: auto;
 }
 </style>

@@ -10,27 +10,22 @@
         style="margin-right: 10px;"
       >
         <a-icon type="plus"></a-icon>批量添加用户
-      </a-button> -->
+      </a-button>-->
 
-      <a-button
-        type="primary"
-        @click="$refs.modal.add()"
-      >
+      <a-button type="primary" @click="$refs.modal.add()">
         <a-icon type="plus"></a-icon>添加角色
       </a-button>
     </div>
 
-    <s-table
-      ref="table"
-      rowKey="id"
-      size="default"
-      :columns="columns"
-      :data="loadData"
-    >
+    <s-table ref="table" rowKey="id" size="default" :columns="columns" :data="loadData">
       <span slot="action" slot-scope="text, record">
         <a @click="$refs.modal.edit(record)" v-action="`org_role_edit`">编辑</a>
         <a-divider type="vertical" />
-        <a href="javascript:;" @click="$router.push(`/org/permission/${record.id}?title=${record.name}`)" v-action="`org_role_permission`">权限管理</a>
+        <a
+          href="javascript:;"
+          @click="$router.push(`/org/permission/${record.id}?title=${record.name}`)"
+          v-action="`org_role_permission`"
+        >权限管理</a>
         <a-divider type="vertical" />
         <a @click="handleDelete(record.id)" v-action="`org_role_delete`">删除</a>
       </span>
@@ -50,9 +45,10 @@ export default {
     STable,
     RoleModal
   },
-  data () {
+  data() {
     return {
-      description: '列表使用场景：后台管理中的权限管理以及角色管理，可用于基于 RBAC 设计的角色权限控制，颗粒度细到每一个操作类型。',
+      description:
+        '列表使用场景：后台管理中的权限管理以及角色管理，可用于基于 RBAC 设计的角色权限控制，颗粒度细到每一个操作类型。',
 
       visible: false,
 
@@ -72,7 +68,8 @@ export default {
         {
           title: '角色描述',
           dataIndex: 'describe'
-        }, {
+        },
+        {
           title: '操作',
           width: '250px',
           dataIndex: 'action',
@@ -82,9 +79,7 @@ export default {
       // 加载数据方法 必须为 Promise 对象
       // 加载数据方法 必须为 Promise 对象
       loadData: parameter => {
-        return api.role.list(
-          Object.assign(parameter, this.queryParam)
-        ).then(res => {
+        return api.role.list(Object.assign(parameter, this.queryParam)).then(res => {
           return res.result
         })
       },
@@ -103,16 +98,14 @@ export default {
         this.permissionList = res.result.data
       })
     },
-    handleEdit (record) {
+    handleEdit(record) {
       this.$ref.modal.visible = true
     },
-    handleOk () {
+    handleOk() {
       // 新增/修改 成功时，重载列表
       this.$refs.table.refresh()
     },
-    handleOkPermission() {
-
-    },
+    handleOkPermission() {},
     handleDelete(id) {
       this.$confirm({
         title: '温馨提示',
@@ -121,7 +114,7 @@ export default {
         okType: 'danger',
         cancelText: '取消',
         onOk: () => {
-          api.role.remove(id).then(() => this.$refs.table.refresh(1))
+          api.role.remove(id).then(() => this.$refs.table.refresh(false))
         },
         onCancel: () => {
           console.log('Cancel')

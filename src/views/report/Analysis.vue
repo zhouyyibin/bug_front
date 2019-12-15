@@ -6,30 +6,32 @@
         <a-select
           @change="handleChangeQuery"
           v-model="query.department"
+          :dropdownMatchSelectWidth="false"
           style="width: 200px;display:inline-block;margin-left: 5px;"
         >
-          <a-select-option :value="0">全部</a-select-option>
           <template v-for="item in departmentList">
             <a-select-option :value="item.id">{{ item.name }}</a-select-option>
-            <template v-for="item2 in item.departments">
-              <a-select-option :value="item2.id">{{ item.name }}>{{ item2.name }}</a-select-option>
-              <template v-for="item3 in item2.departments">
-                <a-select-option :value="item3.id">{{ item.name }}>{{ item2.name }}>{{ item3.name }}</a-select-option>
-              </template>
-            </template>
           </template>
         </a-select>
-        <a-button
+        <!-- <a-button
           class="btn-export"
           type="primary"
           :loading="btnLoading['#bar1']"
           @click="convertCanvasToImage('#bar1', `部门-${query.department}`)"
-        >导出图片</a-button>
+        >导出图片</a-button>-->
       </div>
 
       <a-row :gutter="24">
-        <a-col :span="24">
+        <a-col :span="12">
           <bar id="bar1" :data="chartData['all']" />
+        </a-col>
+        <a-col :span="12">
+          <pie
+            style="height:254px"
+            class="pie-chart"
+            :chart-data="pieData['all']"
+            :options="pieOptions"
+          ></pie>
         </a-col>
       </a-row>
     </a-card>
@@ -44,59 +46,51 @@
             :key="item.id"
           >{{ item.name }}</a-select-option>
         </a-select>
-        <a-button
+        <!-- <a-button
           class="btn-export"
           type="primary"
           :loading="btnLoading['#bar2']"
           @click="convertCanvasToImage('#bar2', `项目-${query.project}`)"
-        >导出图片</a-button>
+        >导出图片</a-button>-->
       </div>
       <a-row :gutter="24">
-        <a-col :span="24">
+        <a-col :span="12">
           <bar id="bar2" :data="chartData['project']" />
         </a-col>
-      </a-row>
-    </a-card>
 
-    <a-card title="指派给我的">
-      <div slot="extra" style="display:inline-block;margin-right: 10px;font-size:14px;">
-        <a-button
-          class="btn-export"
-          type="primary"
-          :loading="btnLoading['#bar3']"
-          @click="convertCanvasToImage('#bar3', '指派给我的')"
-        >导出图片</a-button>
-      </div>
-      <a-row :gutter="24">
-        <a-col :span="24">
-          <bar id="bar3" :data="chartData['mine']" />
+        <a-col :span="12">
+          <pie
+            style="height:254px"
+            class="pie-chart"
+            :chart-data="pieData['project']"
+            :options="pieOptions"
+          ></pie>
         </a-col>
       </a-row>
     </a-card>
 
-    <a-card title="我创建的">
-      <div slot="extra" style="display:inline-block;margin-right: 10px;font-size:14px;">
-        <a-button
-          class="btn-export"
-          type="primary"
-          :loading="btnLoading['#bar4']"
-          @click="convertCanvasToImage('#bar4', '我创建的')"
-        >导出图片</a-button>
+    <a-card title="bug统计" style="margin-top: 20px;padding-bottom: 30px;">
+      <div class="allCount-box">
+        <div class="count-box" v-for="(item, index) in countTitle" :key="item">
+          <div class="count-title">{{item}}</div>
+          <table class="count-table" border="1" bordercolor="#dedede" colspan="0" rowspan="0">
+            <tr v-for="(counter, index2) in allCount['4']" :key="`${index}-${index2}`">
+              <td>{{allCount[index+1][index2] && allCount[index+1][index2].name}}</td>
+              <td>{{allCount[index+1][index2] && allCount[index+1][index2].count}}</td>
+            </tr>
+          </table>
+        </div>
       </div>
-      <a-row :gutter="24">
-        <a-col :span="24">
-          <bar id="bar4" :data="chartData['created']" />
-        </a-col>
-      </a-row>
     </a-card>
   </div>
 </template>
 
 <script>
 import api from '@/api'
-import { Bar } from '@/components'
+import { Bar, Pie } from '@/components'
 import { mixinDevice } from '@/utils/mixin'
 import html2canvas from 'html2canvas'
+import pattern from 'patternomaly'
 const DataSet = require('@antv/data-set')
 
 function downLoad(url, name) {
@@ -112,23 +106,50 @@ export default {
   name: 'Analysis',
   mixins: [mixinDevice],
   components: {
-    Bar
+    Bar,
+    Pie
   },
   data() {
     return {
       loading: true,
       projectList: [],
+      countTitle: ['状态', '严重程度', '优先级', '项目'],
       btnLoading: {
         '#bar1': false,
         '#bar2': false,
         '#bar3': false,
         '#bar4': false
       },
+      pieOptions: {
+        responsive: true,
+        maintainAspectRatio: false,
+        pieceLabel: {
+          render: 'value',
+          precision: 1
+        },
+        showAllTooltips: true,
+        plugins: {
+          datalabels: {
+            color: '#ffffff',
+            font: {
+              size: 16
+            }
+          }
+        }
+      },
+      pieData: {
+        all: {},
+        mine: {},
+        created: {},
+        project: {},
+        depart: {}
+      },
       chartData: {
         all: [],
         mine: [],
         created: [],
-        project: []
+        project: [],
+        depart: []
       },
       query: {
         project: '',
@@ -155,15 +176,22 @@ export default {
         stroke: '#fff',
         lineWidth: 1
       },
-      departmentList: []
+      departmentList: [],
+      allCount: []
     }
   },
   created() {
     this.getAllCount()
     this.getProjecttList()
     this.getDepartList()
+    this.getAllCountTable()
   },
   methods: {
+    getAllCountTable() {
+      api.bug.getAllCount().then(res => {
+        this.allCount = res.data
+      })
+    },
     handleChangeQuery() {
       this.getAllCount()
     },
@@ -172,7 +200,7 @@ export default {
       this.getAllCount()
     },
     getDepartList() {
-      api.department.tree().then(res => {
+      api.department.getSearchList().then(res => {
         const data = res.result.data
         this.departmentList = this.formatTree(data)
       })
@@ -209,12 +237,33 @@ export default {
         this.allCount['mine'] = data.filter(i => i.name.indexOf('指派给我') >= 0)
         this.allCount['created'] = data.filter(i => i.name.indexOf('创建') >= 0)
         this.allCount['project'] = data.filter(i => i.name.indexOf('项目') >= 0)
+        this.allCount['depart'] = data.filter(i => i.name.indexOf('部门') >= 0)
+
+        this.formatPieData()
 
         this.initChart('all')
         this.initChart('mine')
         this.initChart('created')
         this.initChart('project')
       })
+    },
+    formatPieData() {
+      for (let key in this.allCount) {
+        this.pieData[key] = {
+          datasets: [
+            {
+              data: this.allCount[key].map(i => {
+                return i.count
+              }),
+              backgroundColor: ['#3AA1FF', '#FBD437', '#975FE5']
+            }
+          ],
+          labels: this.allCount[key].map(i => {
+            return i.name
+          })
+        }
+      }
+      console.log(this.pieData)
     },
     initChart(type) {
       const dv = new DataSet.View().source(this.allCount[type])
@@ -292,5 +341,72 @@ export default {
 }
 .btn-export {
   margin-left: 10px;
+}
+/deep/ .pie-chart {
+  canvas {
+    margin: auto;
+  }
+}
+
+.allCount-box {
+  width: 100%;
+  display: flex;
+  .count-box {
+    flex: 1;
+  }
+  .count-title {
+    text-align: center;
+    background: #fdad44;
+    color: #fff;
+    border-radius: 4px 4px 0 0;
+    border-bottom: none;
+    padding: 5px;
+    font-size: 14px;
+  }
+
+  .count-box {
+    &:nth-child(2) {
+      .count-title {
+        background: #e85b51;
+      }
+
+      .count-table tr td {
+        background: #fff;
+      }
+    }
+    &:nth-child(3) {
+      .count-title {
+        background: #008f5c;
+      }
+
+      .count-table tr td {
+        background: #e9f2df;
+      }
+    }
+
+    &:nth-child(4) {
+      .count-title {
+        background: #f3986a;
+      }
+
+      .count-table tr td {
+        background: #fff;
+      }
+    }
+  }
+
+  .count-table {
+    width: 100%;
+    height: 100%;
+    tr td {
+      text-align: center;
+      background: #fbeedd;
+      width: 50%;
+      height: 22px;
+      font-size: 14px;
+      padding: 0;
+      line-height: 22px;
+    }
+  }
 }
 </style>

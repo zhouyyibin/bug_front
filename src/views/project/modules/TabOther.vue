@@ -1,15 +1,17 @@
 <template>
   <div class="card-container">
     <a-tabs type="card">
-      <a-tab-pane
-        tab="模块"
-        key="1"
-      >
+      <a-tab-pane tab="模块" key="1">
         <div style="text-align: right;margin-bottom: 10px">
-          <a-button size="small" type="primary" @click="handleAdd(modelList.length)" v-if="!isDetail">添加模块</a-button>
+          <a-button
+            size="small"
+            type="primary"
+            @click="handleAdd(modelList.length)"
+            v-if="!isDetail"
+          >添加模块</a-button>
         </div>
         <a-table
-          style="overflow-x: hidden"
+          style="overflow-x: hidden;overflow-y: auto"
           bordered
           :pagination="false"
           ref="table"
@@ -19,7 +21,12 @@
           :dataSource="modelList"
         >
           <div slot="name" slot-scope="text, record">
-            <a-input style="width: 200px" v-if="record.editable" :disabled="isDetail" v-model="record.name" />
+            <a-input
+              style="width: 200px"
+              v-if="record.editable"
+              :disabled="isDetail"
+              v-model="record.name"
+            />
             <span style="display:inline-block;width: 200px" v-else>{{ record.name }}</span>
           </div>
           <div slot="leadingId" slot-scope="text, record">
@@ -31,22 +38,32 @@
               v-model="record.leadingId"
               :filterOption="filterOptionLeading"
             >
-              <a-select-option v-for="item in userList" :key="item.id" :value="item.id">{{ item.name }}</a-select-option>
+              <a-select-option
+                v-for="item in userList"
+                :key="item.id"
+                :value="item.id"
+              >{{ item.name }}</a-select-option>
             </a-select>
           </div>
+
+          <div slot="senders" slot-scope="text, record">
+            <FormChooseUser
+              :is-detail="isDetail"
+              :value="record.senders"
+              :users="userList"
+              @change="users => handleChangeSenders(users, record.id)"
+              :isSingle="false"
+            ></FormChooseUser>
+          </div>
+
           <span slot="action" slot-scope="text, record">
             <a href="javascript:;" @click="handleDeleteModel(record)" v-if="!isDetail">删除</a>
           </span>
         </a-table>
       </a-tab-pane>
-      <a-tab-pane
-        tab="版本"
-        key="2"
-      >
+      <a-tab-pane tab="版本" key="2">
         <template v-for="(tag) in versionList">
-          <a-tag :key="tag" :closable="!isDetail" :afterClose="() => handleClose(tag)">
-            {{ tag }}
-          </a-tag>
+          <a-tag :key="tag" :closable="!isDetail" :afterClose="() => handleClose(tag)">{{ tag }}</a-tag>
         </template>
         <a-input
           v-if="inputVisible"
@@ -59,14 +76,16 @@
           @blur="handleInputConfirm"
           @keyup.enter="handleInputConfirm"
         />
-        <a-tag v-else @click="showInput" v-show="!isDetail" style="background: #fff; borderStyle: dashed;">
-          <a-icon type="plus" /> 添加版本
+        <a-tag
+          v-else
+          @click="showInput"
+          v-show="!isDetail"
+          style="background: #fff; borderStyle: dashed;"
+        >
+          <a-icon type="plus" />添加版本
         </a-tag>
       </a-tab-pane>
-      <a-tab-pane
-        tab="抄送"
-        key="3"
-      >
+      <a-tab-pane tab="抄送" key="3">
         <div style="display:flex;justify-content:center;align-items: center">
           <a-transfer
             :dataSource="userList"
@@ -77,12 +96,10 @@
             :targetKeys="sendMailUsers"
             @change="handleChange"
             :render="renderItem"
-          >
-          </a-transfer>
+          ></a-transfer>
         </div>
       </a-tab-pane>
     </a-tabs>
-
   </div>
 </template>
 
@@ -90,6 +107,7 @@
 import api from '@/api'
 import STable from '@/components/Table'
 import ChooseUser from './ChooseUser'
+import FormChooseUser from './FormChooseUser'
 export default {
   props: {
     value: {
@@ -106,7 +124,8 @@ export default {
   },
   components: {
     STable,
-    ChooseUser
+    ChooseUser,
+    FormChooseUser
   },
   data() {
     return {
@@ -120,6 +139,11 @@ export default {
           title: '负责人',
           dataIndex: 'leadingId',
           scopedSlots: { customRender: 'leadingId' }
+        },
+        {
+          title: '抄送人',
+          dataIndex: 'senders',
+          scopedSlots: { customRender: 'senders' }
         },
         {
           title: '操作',
@@ -160,15 +184,28 @@ export default {
       this.sendMailUsers = newVal.senderBeans.map(i => i.id)
     }
   },
+  filters: {
+    formatSenders(val) {
+      return val.map(i => i.id)
+    }
+  },
   created() {
     this.getUsers()
   },
   methods: {
+    handleChangeSenders(users, index) {
+      this.modelList[index].senders = users.map(i => {
+        return {
+          id: i.id
+        }
+      })
+    },
     handleAdd(index) {
       this.modelList.push({
         id: index,
         editable: true,
         name: '',
+        senders: [],
         leadingId: ''
       })
     },
@@ -184,7 +221,7 @@ export default {
           this.userList = res.result.data.map(i => {
             i.key = i.id
             i.title = i.name
-            i.description = i.position
+            i.description = i.name
             i.chosen = false
             return i
           })
@@ -220,23 +257,23 @@ export default {
       this.$delete(this.modelList, index)
     },
     // version
-    handleClose (removedTag) {
+    handleClose(removedTag) {
       const versionList = this.versionList.filter(tag => tag !== removedTag)
       this.versionList = versionList
     },
 
-    showInput () {
+    showInput() {
       this.inputVisible = true
       this.$nextTick(() => {
         this.$refs.input.focus()
       })
     },
 
-    handleInputChange (e) {
+    handleInputChange(e) {
       this.inputValue = e.target.value
     },
 
-    handleInputConfirm () {
+    handleInputConfirm() {
       const inputValue = this.inputValue
       let versionList = this.versionList
       if (inputValue && versionList.indexOf(inputValue) === -1) {
@@ -269,7 +306,7 @@ export default {
   height: 570px;
 }
 .card-container {
-  background: #F5F5F5;
+  background: #f5f5f5;
   overflow: hidden;
   padding: 15px;
 }

@@ -49,7 +49,6 @@ const label = {
 const labelInterval = ['value', {
   useHtml: true,
   htmlTemplate: function htmlTemplate(text, item) {
-    console.log(item)
     var a = item.point;
     return '<span class="g2-label-item" style="font-weight:bold">' + a.count + '</span>'
   }

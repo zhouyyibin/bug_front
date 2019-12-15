@@ -185,7 +185,7 @@ export default {
   mixins: [mixin, mixinDevice],
   data () {
     return {
-      visible: true,
+      visible: false,
       colorList
     }
   },
