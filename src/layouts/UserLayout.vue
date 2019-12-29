@@ -8,9 +8,9 @@
         <div class="links">
           深圳市鑫信腾科技有限公司
         </div>
-        <div class="copyright">
+        <!-- <div class="copyright">
           技术支持：珠海研新信息技术有限公司&nbsp;&nbsp;&nbsp;&nbsp;服务热线：18825622418
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
